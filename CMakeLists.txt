@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(reachability_energy_plugin)
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
@@ -17,6 +19,11 @@ endif (graspit_FOUND)
 find_package(Qt4 COMPONENTS QtCore QtSql REQUIRED)
 include_directories(
 	${QT_INCLUDES}
+)
+
+find_package(Eigen3)
+include_directories(
+    ${EIGEN3_INCLUDE_DIR}
 )
 
 ## Uncomment this if the package has a setup.py. This macro ensures
@@ -123,6 +130,8 @@ include_directories(include)
 add_library(reachability_energy_plugin
 	src/customEnergyPlugin.cpp
 	src/contactEnergy.cpp
+	src/reachabilityEnergy.cpp
+	src/reachableEnergyUtils.cpp
 )
 
 ## Add cmake target dependencies of the library

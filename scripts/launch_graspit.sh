@@ -13,5 +13,4 @@ export GRASPIT_PLUGIN_DIR=$(dirname $(catkin_find libreachability_energy_plugin.
 
 
 export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
-graspit_simulator -p libreachability_energy_plugin --node_name graspit
-# graspit_simulator -p libgraspit_interface,libreachability_energy_plugin --node_name graspit
+graspit_simulator -p libgraspit_interface,libreachability_energy_plugin --node_name graspit

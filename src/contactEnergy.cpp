@@ -1,5 +1,5 @@
 
-#include "graspit/EGPlanner/energy/contactEnergy.h"
+#include "contactEnergy.h"
 #include "graspit/robot.h"
 #include "graspit/grasp.h"
 #include "graspit/debug.h"
