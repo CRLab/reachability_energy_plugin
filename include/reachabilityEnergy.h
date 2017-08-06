@@ -4,6 +4,8 @@
 #include "graspit/EGPlanner/energy/searchEnergy.h"
 #include "reachableEnergyUtils.h"
 
+#include <eigen3/unsupported/Eigen/CXX11/Tensor>
+
 class ReachabilityEnergy: public SearchEnergy
 {
   public:
@@ -17,10 +19,8 @@ class ReachabilityEnergy: public SearchEnergy
     double reachableQualityEnergy() const;
 
   private:
-    // flann::Index<flann::L2<double> > *poseFlannIndex ;
     Eigen::VectorXd isReachableFlagMatrix;
     Eigen::VectorXd stepSize;
-//    std::vector<double> stepSize;
     Eigen::MatrixXd objectBaseTrans;
     double alpha;
     double contact_coeff;
@@ -31,12 +31,12 @@ class ReachabilityEnergy: public SearchEnergy
     Eigen::VectorXi dims;
     Eigen::VectorXd mins;
     Eigen::VectorXd steps;
-//    double* reachSpaceFull;
-//    double* reachSpaceSDF;
 
+   double* reachSpaceArrayFull;
+   double* reachSpaceArraySDF;
 
-    double reachSpaceFull[8][13][8][1][16][32];
-    double reachSpaceSDF[8][13][8][1][16][32];
+   Eigen::Tensor<double, 3, Eigen::RowMajor> reachSpaceTensorFull;
+   Eigen::Tensor<double, 3, Eigen::RowMajor> reachSpaceTensorSDF;
 
 
     double interpolateReachability(Eigen::VectorXd query) const;

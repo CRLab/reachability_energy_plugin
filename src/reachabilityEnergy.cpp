@@ -12,63 +12,52 @@
 
 #include <QSettings>
 
-#include <eigen3/unsupported/Eigen/CXX11/Tensor>
 
 ReachabilityEnergy::ReachabilityEnergy()
 {
 //    export REACHABILITY_CONFIG_FILE=/home/ireti/ros/reachability_paper_experiments/src/graspit-ros/graspit/graspit_source/reachability.conf
     QString configFile = getenv("REACHABILITY_CONFIG_FILE");
+#ifdef DEBUG
     std::cout << "configFile: \t" << configFile.toStdString() << std::endl;
-    QSettings settings(configFile,  QSettings::NativeFormat);
+#endif
 
-    string filename = (settings.value("reachability_data/reach_filename").toString()).toStdString();
-    std::cout << "filename: " << filename << std::endl;
+    QSettings settings(configFile,  QSettings::NativeFormat);
+    string filename = (settings.value("reachability_config/reachability_data_filename").toString()).toStdString();
+
     load_file_templated (filename+".dims", dims);
     load_file_templated (filename+".mins", mins);
     load_file_templated (filename+".step", steps);
 
-    //    reachSpaceFull = new double[dims[0]][dims[1]][dims[2]][dims[3]][dims[4]][dims[5]];
-    load_data_6dim(filename+".full", (double*)&reachSpaceFull);
+    load_ND_Array (filename+".full", reachSpaceArrayFull);
+    load_ND_Array (filename+".sdf", reachSpaceArraySDF);
+    reachSpaceTensorFull = Eigen::TensorMap<Eigen::Tensor<double, 3, Eigen::RowMajor>> (reachSpaceArrayFull, dims[0], dims[1], dims[2]);
+    reachSpaceTensorSDF = Eigen::TensorMap<Eigen::Tensor<double, 3, Eigen::RowMajor>> (reachSpaceArraySDF, dims[0], dims[1], dims[2]);
 
-    //    reachSpaceSDF = new double[dims[0]][dims[1]][dims[2]][dims[3]][dims[4]][dims[5]];
-    load_data_6dim(filename+".sdf", (double*)&reachSpaceSDF);
-
-
-    double *array;
-    load_ND_Array (filename+".sdf", array);
-    Eigen::Tensor<double, 6, Eigen::RowMajor> arrayMatrix(dims[0], dims[1], dims[2], dims[3], dims[4], dims[5]);
-    arrayMatrix = Eigen::TensorMap<Eigen::Tensor<double, 6, Eigen::RowMajor>> (array, dims[0], dims[1], dims[2], dims[3], dims[4], dims[5]);
-    cout << "arrayMatrix(2,1,0,0,10,1): \t" << arrayMatrix(2,1,0,0,10,1) << endl;
 
 #ifdef DEBUG
-    cout << "reachSpaceFull[2][1][0][0][10][1]:\t" << reachSpaceFull[2][1][0][0][10][1] << endl;
-    cout << "reachSpaceSDF[2][1][0][0][10][1]:\t" << reachSpaceSDF[2][1][0][0][10][1] << endl;
+    std::cout << "filename: " << filename << std::endl;
+    cout << "reachSpaceTensorSDF(2,1,0): \t" << reachSpaceTensorSDF(2,1,0) << endl;
 #endif
 
-    contact_coeff = settings.value("mixing_coeffs/contact_coeff").toDouble();
-    potential_coeff = settings.value("mixing_coeffs/potential_coeff").toDouble();
-    reachability_coeff = settings.value("mixing_coeffs/reachability_coeff").toDouble();
+    contact_coeff = settings.value("reachability_config/contact_energy_coeff").toDouble();
+    potential_coeff = settings.value("reachability_config/potential_energy_coeff").toDouble();
+    reachability_coeff = settings.value("reachability_config/reachability_energy_coeff").toDouble();
+
+#ifdef DEBUG
     std::cout << "contact_coeff: " << contact_coeff << std::endl;
     std::cout << "potential_coeff: " << potential_coeff << std::endl;
     std::cout << "reachability_coeff: " << reachability_coeff << std::endl;
-
+#endif
 
     // load object-base transform
-    string filename_objBaseTrans = (settings.value("reachability_data/objbasetrans_file").toString()).toStdString();
+    string filename_objBaseTrans = (settings.value("reachability_config/object_pose_in_reference_frame").toString()).toStdString();
     std::cout << "filename_objBaseTrans: " << filename_objBaseTrans << std::endl;
     load_file_as_eigen_matrix (filename_objBaseTrans, objectBaseTrans);
 
 #ifdef DEBUG
-    std::cout << "object-base transform: \t " << objectBaseTrans << std::endl;
+    std::cout << "object-base transform: \t "<< std::endl << objectBaseTrans << std::endl;
 #endif
 }
-
-//double ReachabilityEnergy::energy() const
-//{
-//    double reachableEnergy = reachableQualityEnergy();
-
-//    return -reachableEnergy;        //NOTE: THIS IS NEGATIVE OF THE REACHABLE ENERGY
-//}
 
 
 double ReachabilityEnergy::energy() const
@@ -230,10 +219,11 @@ double ReachabilityEnergy::interpolateReachability(
 
       // collate index and weight
         int full_index = ravel_multi_index(index, dims);
-        cornerValues[i] = ((double *)reachSpaceSDF)[full_index];
+        cornerValues[i] = ((double *)reachSpaceArraySDF)[full_index];
 
         cout << "cornerValues[i]" << cornerValues[i] << endl;
-        cout << "reachSpaceSDF[2][1][0][0][10][1]:\t" << reachSpaceSDF[index[0]][index[1]][index[2]][index[3]][index[4]][index[5]] << endl;
+        // cout << "reachSpaceTensorSDF(2,1,0):\t" << reachSpaceTensorSDF(2,1,0) << endl;
+        cout << "reachSpaceTensorSDF(index[0],index[1],index[2]):\t" << reachSpaceTensorSDF(index[0],index[1],index[2]) << endl;
         interpWeights[i] = weight;
      }
      double num = (cornerValues.array() * interpWeights.array()).sum() ;
