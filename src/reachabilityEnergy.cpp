@@ -109,19 +109,20 @@ double ReachabilityEnergy::reachableQualityEnergy() const
 
 
 
-//double ReachabilityEnergy::interpolateReachability(
+// double ReachabilityEnergy::interpolateReachability(
 //        Eigen::VectorXd query
 //        ) const
-//{
-//    int ndims = query.size();
-////    int ndims = 3;
+// {
+//    cout << "query: \n" << endl << query << endl;
+//    int ndims = dims.size();
+// //    int ndims = 3;
 
-//    // query roll and yaw calculated using atan2 is between -pi and pi
-//    // however, data generation was between 0 and 2pi
-//    if  (query[3] < 0)
-//        query[3] += 2*M_PI;            // add 2pi to normalize range to 0-2pi
-//    if  (query[5] < 0)
-//        query[5] += 2*M_PI;            // add 2pi to normalize range to 0-2pi
+//    // // query roll and yaw calculated using atan2 is between -pi and pi
+//    // // however, data generation was between 0 and 2pi
+//    // if  (query[3] < 0)
+//    //     query[3] += 2*M_PI;            // add 2pi to normalize range to 0-2pi
+//    // if  (query[5] < 0)
+//    //     query[5] += 2*M_PI;            // add 2pi to normalize range to 0-2pi
 
 //    Eigen::VectorXi indicesFloor(ndims);
 //    Eigen::VectorXi indicesCeiling(ndims);
@@ -145,13 +146,10 @@ double ReachabilityEnergy::reachableQualityEnergy() const
 //            indicesCeiling[i] = dims[i];
 //        }
 //    }
-//    cout << indicesFloor << endl;
-////    double val1 = reachSpaceSDF[indicesFloor[0]][indicesFloor[1]][indicesFloor[2]][0][0][0];
-////    double val2 = reachSpaceSDF[indicesCeiling[0]][indicesCeiling[1]][indicesCeiling[2]][0][0][0];
+//    cout << "indicesFloor: \n" << endl << indicesFloor << endl;
 
-
-//    double val1 = reachSpaceSDF[indicesFloor[0]][indicesFloor[1]][indicesFloor[2]][indicesFloor[3]][indicesFloor[4]][indicesFloor[5]];
-//    double val2 = reachSpaceSDF[indicesCeiling[0]][indicesCeiling[1]][indicesCeiling[2]][indicesCeiling[3]][indicesCeiling[4]][indicesCeiling[5]];
+//    double val1 = reachSpaceTensorSDF(indicesFloor[0],indicesFloor[1],indicesFloor[2]);
+//    double val2 = reachSpaceTensorSDF(indicesCeiling[0],indicesCeiling[1],indicesCeiling[2]);
 
 //    double val = (ceilDistance.norm() * val1 + floorDistance.norm() * val2) /(floorDistance.norm() + ceilDistance.norm() );
 //    cout << "mHand->getTran(): \t" << mHand->getTran() << endl;
@@ -163,7 +161,7 @@ double ReachabilityEnergy::reachableQualityEnergy() const
 
 //    return val;
 
-//}
+// }
 
 
 
