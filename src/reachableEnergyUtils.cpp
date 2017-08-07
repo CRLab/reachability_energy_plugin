@@ -40,7 +40,7 @@ void std_vector_2_eigen_matrix (const std::vector<std::vector<double> > vD, Eige
         int n_rows = vD.size();
         int n_cols = vD[0].size();
 
-        cout << "n_rows: " << n_rows <<", n_cols: " << n_cols<< endl;
+        // cout << "n_rows: " << n_rows <<", n_cols: " << n_cols<< endl;
 
         D.resize(n_rows, n_cols);
 

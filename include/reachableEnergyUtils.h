@@ -64,10 +64,10 @@ void load_file_templated (const std::string filename, std::vector<T>& row) {
                 stream_line.ignore();
         }
         in.close();
-    cout << row.size() << endl;
-    for (int i = 0; i < row.size(); ++i)
-        cout << row[i] << ", ";
-    cout << endl;
+    // cout << row.size() << endl;
+    // for (int i = 0; i < row.size(); ++i)
+    //     cout << row[i] << ", ";
+    // cout << endl;
 }
 
 template<typename Scalar>
