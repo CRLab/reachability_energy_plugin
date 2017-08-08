@@ -49,6 +49,15 @@ ReachabilityEnergy::ReachabilityEnergy()
     reachSpaceTensorFull = Eigen::TensorMap<Eigen::Tensor<double, 3, Eigen::RowMajor>> (reachSpaceArrayFull, dims[0], dims[1], dims[2]);
     reachSpaceTensorSDF = Eigen::TensorMap<Eigen::Tensor<double, 3, Eigen::RowMajor>> (reachSpaceArraySDF, dims[0], dims[1], dims[2]);
 
+    // cout << "reachSpaceTensorSDF.minimum(): \t" << reachSpaceTensorSDF.minimum() << endl;
+    // cout << "reachSpaceTensorSDF.maximum(): \t" << reachSpaceTensorSDF.maximum() << endl;
+    Eigen::Tensor<double, 0, Eigen::RowMajor> tempMin = reachSpaceTensorSDF.minimum();
+    reach_min = *tempMin.data();
+    Eigen::Tensor<double, 0, Eigen::RowMajor> tempMax = reachSpaceTensorSDF.maximum();
+    reach_max = *tempMax.data();
+    cout << "reachSpaceTensorSDF.minimum(): \t" << reach_min << endl;
+    cout << "reachSpaceTensorSDF.maximum(): \t" << reach_max << endl;
+
 #ifdef DEBUG
     cout << "reachSpaceTensorSDF(2,1,0): \t" << reachSpaceTensorSDF(2,1,0) << endl;
 #endif
@@ -66,7 +75,16 @@ double ReachabilityEnergy::energy() const
 
     double potentialEnergy = potentialQualityEnergy();
     double contactEnergyVal = contactEnergy();
-    double reachableEnergy = -reachableQualityEnergy();        //NOTE: THIS IS NEGATIVE OF THE REACHABLE ENERGY i.e. we minimimize the negative of the reachability energy
+    // double reachableEnergy = -reachableQualityEnergy();        //NOTE: THIS IS NEGATIVE OF THE REACHABLE ENERGY i.e. we minimimize the negative of the reachability energy
+    double reachableEnergy = reachableQualityEnergy();
+
+    // f(x) = m(x - c)
+    // R_c = 1/(1 + e^(f(x)))
+    // double R_c = 1/(1 + e^(0.765*(reachableEnergy-(-5.71485739629))));
+    // double R_p = 1/(1 + e^(-3.072*(reachableEnergy-(-1.20710678119))))
+
+    double R_p = (reachableEnergy - reach_min)/(reach_max- reach_min);
+    double R_c = (reach_max - reachableEnergy)/(reach_max- reach_min);
 
 #ifdef DEBUG
     cout << "HybridReachableGraspEnergy::energy(): \t" << endl;
@@ -76,8 +94,15 @@ double ReachabilityEnergy::energy() const
     cout << "reachableEnergy: \t" << reachableEnergy << endl;
 #endif
 
-    double energyCombined = contact_coeff*contactEnergyVal + potential_coeff*potentialEnergy + reachability_coeff*reachableEnergy;
-    return energyCombined;
+    if (potentialEnergy > 0.0)
+        {
+            return contactEnergyVal * 10*R_c;
+        }
+        return potentialEnergy * 10*R_p;
+
+
+    // double energyCombined = contact_coeff*contactEnergyVal + potential_coeff*potentialEnergy + reachability_coeff*reachableEnergy;
+    // return energyCombined;
 }
 
 

@@ -26,6 +26,8 @@ class ReachabilityEnergy: public SearchEnergy
     double contact_coeff;
     double potential_coeff;
     double reachability_coeff;
+    double reach_max;
+    double reach_min;
 
 
     Eigen::VectorXi dims;
