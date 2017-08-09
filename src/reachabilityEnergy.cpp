@@ -46,21 +46,40 @@ ReachabilityEnergy::ReachabilityEnergy()
 
     load_ND_Array (filename+".full", reachSpaceArrayFull);
     load_ND_Array (filename+".sdf", reachSpaceArraySDF);
-    reachSpaceTensorFull = Eigen::TensorMap<Eigen::Tensor<double, 3, Eigen::RowMajor>> (reachSpaceArrayFull, dims[0], dims[1], dims[2]);
-    reachSpaceTensorSDF = Eigen::TensorMap<Eigen::Tensor<double, 3, Eigen::RowMajor>> (reachSpaceArraySDF, dims[0], dims[1], dims[2]);
 
-    // cout << "reachSpaceTensorSDF.minimum(): \t" << reachSpaceTensorSDF.minimum() << endl;
-    // cout << "reachSpaceTensorSDF.maximum(): \t" << reachSpaceTensorSDF.maximum() << endl;
-    Eigen::Tensor<double, 0, Eigen::RowMajor> tempMin = reachSpaceTensorSDF.minimum();
-    reach_min = *tempMin.data();
-    Eigen::Tensor<double, 0, Eigen::RowMajor> tempMax = reachSpaceTensorSDF.maximum();
-    reach_max = *tempMax.data();
-    cout << "reachSpaceTensorSDF.minimum(): \t" << reach_min << endl;
-    cout << "reachSpaceTensorSDF.maximum(): \t" << reach_max << endl;
+    if (dims.size() == 3)
+    {
+      reachSpaceTensorFull = Eigen::TensorMap<Eigen::Tensor<double, 3, Eigen::RowMajor>> (reachSpaceArrayFull, dims[0], dims[1], dims[2]);
+      reachSpaceTensorSDF = Eigen::TensorMap<Eigen::Tensor<double, 3, Eigen::RowMajor>> (reachSpaceArraySDF, dims[0], dims[1], dims[2]);
+      // cout << "reachSpaceTensorSDF.minimum(): \t" << reachSpaceTensorSDF.minimum() << endl;
+      // cout << "reachSpaceTensorSDF.maximum(): \t" << reachSpaceTensorSDF.maximum() << endl;
+      Eigen::Tensor<double, 0, Eigen::RowMajor> tempMin = reachSpaceTensorSDF.minimum();
+      reach_min = *tempMin.data();
+      Eigen::Tensor<double, 0, Eigen::RowMajor> tempMax = reachSpaceTensorSDF.maximum();
+      reach_max = *tempMax.data();
 
-#ifdef DEBUG
-    cout << "reachSpaceTensorSDF(2,1,0): \t" << reachSpaceTensorSDF(2,1,0) << endl;
-#endif
+      #ifdef DEBUG
+          cout << "reachSpaceTensorSDF.minimum(): \t" << reach_min << endl;
+          cout << "reachSpaceTensorSDF.maximum(): \t" << reach_max << endl;
+          cout << "reachSpaceTensorSDF(2,1,0): \t" << reachSpaceTensorSDF(2,1,0) << endl;
+      #endif
+    }
+
+    if (dims.size() == 6)
+    {
+      reachSpaceTensorFull_6D = Eigen::TensorMap<Eigen::Tensor<double, 6, Eigen::RowMajor>> (reachSpaceArrayFull, dims[0], dims[1], dims[2], dims[3], dims[4], dims[5]);
+      reachSpaceTensorSDF_6D = Eigen::TensorMap<Eigen::Tensor<double, 6, Eigen::RowMajor>> (reachSpaceArraySDF, dims[0], dims[1], dims[2], dims[3], dims[4], dims[5]);
+      Eigen::Tensor<double, 0, Eigen::RowMajor> tempMin = reachSpaceTensorSDF_6D.minimum();
+      reach_min = *tempMin.data();
+      Eigen::Tensor<double, 0, Eigen::RowMajor> tempMax = reachSpaceTensorSDF_6D.maximum();
+      reach_max = *tempMax.data();
+
+      #ifdef DEBUG
+          cout << "reachSpaceTensorSDF_6D.minimum(): \t" << reach_min << endl;
+          cout << "reachSpaceTensorSDF_6D.maximum(): \t" << reach_max << endl;
+          cout << "reachSpaceTensorSDF_6D(2,1,0,0,3,2): \t" << reachSpaceTensorSDF_6D(2,1,0,0,3,2) << endl;
+      #endif
+    }
 
     // load object-base transform
     load_file_as_eigen_matrix (filename_objBaseTrans, objectBaseTrans);
@@ -145,7 +164,6 @@ double ReachabilityEnergy::reachableQualityEnergy() const
 //    cout << "query: \n" << endl << query << endl;
 //     #endif
 //    int ndims = dims.size();
-// //    int ndims = 3;
 
 //    // // query roll and yaw calculated using atan2 is between -pi and pi
 //    // // however, data generation was between 0 and 2pi
@@ -167,6 +185,7 @@ double ReachabilityEnergy::reachableQualityEnergy() const
 
 //        if(indicesFloor[i] < 0){
 //            cout << "INDEX OUT OF DIMENSION i: "<< i <<" indices[i]: \t" << indicesFloor[i]  << endl;
+//            cout << "query[i]: "<< query[i] <<" mins[i]: \t" << mins[i] <<" steps[i]: \t" << steps[i]   << endl;
 //            indicesFloor[i] = 0;
 //            indicesCeiling[i] = 0;
 //        }
@@ -181,9 +200,18 @@ double ReachabilityEnergy::reachableQualityEnergy() const
 //    cout << "indicesFloor: \n" << endl << indicesFloor << endl;
 //     #endif
 
-
-//    double val1 = reachSpaceTensorSDF(indicesFloor[0],indicesFloor[1],indicesFloor[2]);
-//    double val2 = reachSpaceTensorSDF(indicesCeiling[0],indicesCeiling[1],indicesCeiling[2]);
+//    double val1;
+//    double val2;
+//   if (dims.size() == 3)
+//     {
+//       val1 = reachSpaceTensorSDF(indicesFloor[0],indicesFloor[1],indicesFloor[2]);
+//       val2 = reachSpaceTensorSDF(indicesCeiling[0],indicesCeiling[1],indicesCeiling[2]);
+//     }
+//   if (dims.size() == 6)
+//     {
+//       val1 = reachSpaceTensorSDF_6D(indicesFloor[0],indicesFloor[1],indicesFloor[2],indicesFloor[3],indicesFloor[4],indicesFloor[5]);
+//       val2 = reachSpaceTensorSDF_6D(indicesCeiling[0],indicesCeiling[1],indicesCeiling[2],indicesCeiling[3],indicesCeiling[4],indicesCeiling[5]);
+//     }
 
 //    double val = (ceilDistance.norm() * val1 + floorDistance.norm() * val2) /(floorDistance.norm() + ceilDistance.norm() );
 
@@ -256,12 +284,24 @@ double ReachabilityEnergy::interpolateReachability(
       // collate index and weight
         // int full_index = ravel_multi_index(index, dims);
         // cornerValues[i] = ((double *)reachSpaceArraySDF)[full_index];
-       cornerValues[i] = reachSpaceTensorSDF(index[0],index[1],index[2]);
 
-      #ifdef DEBUG
-        cout << "cornerValues[i]: \t" << cornerValues[i] << endl;
-        cout << "reachSpaceTensorSDF(index[0],index[1],index[2]):\t" << reachSpaceTensorSDF(index[0],index[1],index[2]) << endl;
-      #endif
+        if (dims.size() == 3)
+        {
+         cornerValues[i] = reachSpaceTensorSDF(index[0],index[1],index[2]);
+          #ifdef DEBUG
+            cout << "cornerValues[i]: \t" << cornerValues[i] << endl;
+            cout << "reachSpaceTensorSDF(index[0],index[1],index[2]):\t" << reachSpaceTensorSDF(index[0],index[1],index[2]) << endl;
+          #endif
+        }
+
+        if (dims.size() == 6)
+        {
+          cornerValues[i] = reachSpaceTensorSDF_6D(index[0],index[1],index[2],index[3],index[4],index[5]);
+          #ifdef DEBUG
+            cout << "cornerValues[i]: \t" << cornerValues[i] << endl;
+            cout << "reachSpaceTensorSDF_6D(index[0],index[1],index[2],index[3],index[4],index[5]):\t" << reachSpaceTensorSDF_6D(index[0],index[1],index[2],index[3],index[4],index[5]) << endl;
+          #endif
+        }
 
         interpWeights[i] = weight;
      }

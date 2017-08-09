@@ -40,6 +40,8 @@ class ReachabilityEnergy: public SearchEnergy
    Eigen::Tensor<double, 3, Eigen::RowMajor> reachSpaceTensorFull;
    Eigen::Tensor<double, 3, Eigen::RowMajor> reachSpaceTensorSDF;
 
+   Eigen::Tensor<double, 6, Eigen::RowMajor> reachSpaceTensorFull_6D;
+   Eigen::Tensor<double, 6, Eigen::RowMajor> reachSpaceTensorSDF_6D;
 
     double interpolateReachability(Eigen::VectorXd query) const;
 
