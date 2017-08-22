@@ -378,8 +378,10 @@ double ReachabilityEnergy::potentialQualityEnergy() const
         if (factor > 0.25)
         {
             count++;
-            contact->mark(true);
-        } else { contact->mark(false); }
+            // contact->mark(true);
+        } else {
+          // contact->mark(false);
+        }
     }
     double gq = -1;
     //to make computations more efficient, we only use a 3D approximation
