@@ -1,10 +1,10 @@
-#include "EGPlanner/energy/hybridReachableGraspEnergy.h"
-#include "robot.h"
-#include "grasp.h"
-#include "debug.h"
-#include "world.h"
-#include "quality.h"
-#include "contact/virtualContact.h"
+#include "hybridReachableGraspEnergy.h"
+#include "graspit/robot.h"
+#include "graspit/grasp.h"
+#include "graspit/debug.h"
+#include "graspit/world.h"
+#include "graspit/quality/quality.h"
+#include "graspit/contact/virtualContact.h"
 
 
 #include <fstream>
@@ -22,96 +22,32 @@ double HybridReachableGraspEnergy::energy() const
 
     double potentialEnergy = potentialQualityEnergy();
     double contactEnergyVal = contactEnergy();
-    double reachableEnergy = -reachableQualityEnergy();        //NOTE: THIS IS NEGATIVE OF THE REACHABLE ENERGY
+    // double reachableEnergy = -reachableQualityEnergy();        //NOTE: THIS IS NEGATIVE OF THE REACHABLE ENERGY i.e. we minimimize the negative of the reachability energy
+    double reachableEnergy = reachableQualityEnergy();
 
-//    if (potentialEnergy > 0.0)
-//    {
-//        return contactEnergy();
-//    }
+    // f(x) = m(x - c)
+    // R_c = 1/(1 + e^(f(x)))
+    // double R_c = 1/(1 + e^(0.765*(reachableEnergy-(-5.71485739629))));
+    // double R_p = 1/(1 + e^(-3.072*(reachableEnergy-(-1.20710678119))))
 
-    //  double alpha = 50;
-    //  double alpha = rand() / (RAND_MAX + 1.);
-    //  cout << "alpha: " << endl;
+    double R_p = (reachableEnergy - reach_min)/(reach_max- reach_min);
+    double R_c = (reach_max - reachableEnergy)/(reach_max- reach_min);
 
-    //  if(reachableEnergy > 0)
-    //      cout << "reachableEnergy: \t" << reachableEnergy << endl;
-    //      cout << "potentialEnergy: \t" << potentialEnergy << endl;
+    #ifdef DEBUG
+        cout << "HybridReachableGraspEnergy::energy(): \t" << endl;
+        cout << "========================================================================== \t" << endl;
+        cout << "contactEnergyVal: \t" << contactEnergyVal << endl;
+        cout << "potentialEnergy: \t" << potentialEnergy << endl;
+        cout << "reachableEnergy: \t" << reachableEnergy << endl;
+    #endif
 
-#ifdef DEBUG
-    cout << "HybridReachableGraspEnergy::energy(): \t" << endl;
-    cout << "========================================================================== \t" << endl;
-    cout << "contactEnergyVal: \t" << contactEnergyVal << endl;
-    cout << "potentialEnergy: \t" << potentialEnergy << endl;
-    cout << "reachableEnergy: \t" << reachableEnergy << endl;
-#endif
-
-    std::ofstream outfile;
-    outfile.open("/home/aal/wrkSpc/reachability_paper_experiments/reachability_exp/data/annealing_data/cpr_energy.txt", std::ios_base::app);
-    outfile << contactEnergyVal << ","<< potentialEnergy << ","<< reachableEnergy << "\n";
-    outfile.close();
-
-    //  sleep(30);
-    return combineEnergies( contactEnergyVal, potentialEnergy, reachableEnergy, 3) ;
-
-//    return potentialEnergy + alpha * (1 - reachableEnergy);
-//      return -reachableEnergy;
-}
+    if (potentialEnergy > 0.0)
+        {
+            return contactEnergyVal * 10*R_c;
+        }
+        return potentialEnergy * 10*R_p;
 
 
-double HybridReachableGraspEnergy::combineEnergies( double contactEnergyVal,
-                                                    double potentialEnergy ,
-                                                    double reachableEnergy,
-                                                    int mix_id
-                                                    ) const
-{
-    switch(mix_id) {
-        case 1:
-        cout << "case 1:\t contactEnergyVal: "<< endl;
-                return contactEnergyVal;
-                break;
-    case 2:
-        cout << "case 2:\t potentialEnergy: "<< endl;
-            return potentialEnergy;
-            break;
-    case 3:
-//        cout << "case 3:\t reachableEnergy: "<< endl;
-            return reachableEnergy;
-            break;
-    case 4:
-        cout << "case 4:\t (reachable+contact) : "<< endl;
-//        cout << "contactEnergyVal: \t" << contactEnergyVal << endl;
-//        cout << "reachableEnergy: \t" << reachableEnergy << endl;
-        return contactEnergyVal+10.0*reachableEnergy;
-            break;
-    case 5:
-        cout << "case 5:\t (reachable+contact) guided potential: "<< endl;
-//        cout << "contactEnergyVal: \t" << contactEnergyVal << endl;
-//        cout << "potentialEnergy: \t" << potentialEnergy << endl;
-//        cout << "reachableEnergy: \t" << reachableEnergy << endl;
-        if (potentialEnergy > 0.0)
-            {
-                return contactEnergyVal+100.0*reachableEnergy;
-            }
-            return potentialEnergy;
-            break;
-    case 6:
-        cout << "case 6:\t (reachable+contact) -> guided (reachable+potential): "<< endl;
-        if (potentialEnergy > 0.0)
-            {
-                return contactEnergyVal+1000.0*reachableEnergy;
-            }
-            return potentialEnergy+100.0*reachableEnergy;
-            break;
-
-
-        default:
-        cout << "default case :\t GuidedPotentialQualityEnergy: "<< endl;
-            if (potentialEnergy > 0.0)
-                {
-                    return contactEnergyVal;
-                }
-                return potentialEnergy;
-                break;
-    }
-
+    // double energyCombined = contact_coeff*contactEnergyVal + potential_coeff*potentialEnergy + reachability_coeff*reachableEnergy;
+    // return energyCombined;
 }

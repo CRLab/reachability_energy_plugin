@@ -1,9 +1,9 @@
 #ifndef _hybridreachablegraspenergy_h_
 #define _hybridreachablegraspenergy_h_
 
-#include "EGPlanner/energy/searchEnergy.h"
-#include "EGPlanner/energy/reachableEnergyUtils.h"
-#include "EGPlanner/energy/reachabilityEnergy.h"
+#include "graspit/EGPlanner/energy/searchEnergy.h"
+// #include "reachableEnergyUtils.h"
+#include "reachabilityEnergy.h"
 
 class HybridReachableGraspEnergy: public ReachabilityEnergy
 {
@@ -11,11 +11,11 @@ class HybridReachableGraspEnergy: public ReachabilityEnergy
     double energy() const;
 //    HybridReachableGraspEnergy();
 private:
-    double combineEnergies(double contactEnergyVal,
-                           double potentialEnergy ,
-                           double reachableEnergy,
-                           int mix_id
-                           ) const;
+    // double combineEnergies(double contactEnergyVal,
+    //                        double potentialEnergy ,
+    //                        double reachableEnergy,
+    //                        int mix_id
+    //                        ) const;
 
 };
 

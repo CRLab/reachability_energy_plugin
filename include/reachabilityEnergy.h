@@ -18,6 +18,9 @@ class ReachabilityEnergy: public SearchEnergy
     double potentialQualityScalingFunction(double dist, double cosTheta)const ;
     double reachableQualityEnergy() const;
 
+    double reach_max;
+    double reach_min;
+
   private:
     Eigen::VectorXd isReachableFlagMatrix;
     Eigen::VectorXd stepSize;
@@ -26,8 +29,6 @@ class ReachabilityEnergy: public SearchEnergy
     double contact_coeff;
     double potential_coeff;
     double reachability_coeff;
-    double reach_max;
-    double reach_min;
 
 
     Eigen::VectorXi dims;

@@ -129,8 +129,8 @@ include_directories(include)
 # Declare a C++ library
 add_library(reachability_energy_plugin
 	src/customEnergyPlugin.cpp
-	src/contactEnergy.cpp
 	src/reachabilityEnergy.cpp
+	src/hybridReachableGraspEnergy.cpp
 	src/reachableEnergyUtils.cpp
 )
 
