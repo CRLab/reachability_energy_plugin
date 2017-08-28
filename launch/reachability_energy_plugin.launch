@@ -1,5 +1,5 @@
 <launch>
-	<env name="REACHABILITY_CONFIG_FILE" value="$(find reachability_utils)/config/reachability.conf"  />
+	<env name="REACHABILITY_CONFIG_DIR" value="$(find reachability_experiments)/data"  />
 
   <node name="reachability_energy_plugin" pkg="reachability_energy_plugin" type="launch_graspit.sh" output="screen" />
 </launch>

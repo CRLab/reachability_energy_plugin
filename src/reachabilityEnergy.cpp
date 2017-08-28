@@ -16,14 +16,16 @@
 ReachabilityEnergy::ReachabilityEnergy()
 {
 //    export REACHABILITY_CONFIG_FILE=/home/ireti/ros/reachability_paper_experiments/src/graspit-ros/graspit/graspit_source/reachability.conf
-    QString configFile = getenv("REACHABILITY_CONFIG_FILE");
+    QString configDir = getenv("REACHABILITY_CONFIG_DIR");
+    QString configFile = configDir + QString("/reachability.conf");
 #ifdef DEBUG
+    std::cout << "configDir: \t" << configDir.toStdString() << std::endl;
     std::cout << "configFile: \t" << configFile.toStdString() << std::endl;
 #endif
 
     QSettings settings(configFile,  QSettings::NativeFormat);
-    string filename = (settings.value("reachability_config/reachability_data_filename").toString()).toStdString();
-    string filename_objBaseTrans = (settings.value("reachability_config/object_pose_in_reference_frame").toString()).toStdString();
+    string filename = configDir.toStdString() + "/processed/reach_data";
+    string filename_objBaseTrans = configDir.toStdString() + "/object_pose_in_reference_frame.csv";
 
     contact_coeff = settings.value("reachability_config/contact_energy_coeff").toDouble();
     potential_coeff = settings.value("reachability_config/potential_energy_coeff").toDouble();
