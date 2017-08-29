@@ -21,7 +21,7 @@ double HybridReachableGraspEnergy::energy() const
     mHand->getGrasp()->collectVirtualContacts();
 
     double potentialEnergy = potentialQualityEnergy();
-    double contactEnergyVal = contactEnergy();
+    double contactEnergyVal;
     // double reachableEnergy = -reachableQualityEnergy();        //NOTE: THIS IS NEGATIVE OF THE REACHABLE ENERGY i.e. we minimimize the negative of the reachability energy
     double reachableEnergy = reachableQualityEnergy();
 
@@ -30,10 +30,11 @@ double HybridReachableGraspEnergy::energy() const
     // double R_c = 1/(1 + e^(0.765*(reachableEnergy-(-5.71485739629))));
     // double R_p = 1/(1 + e^(-3.072*(reachableEnergy-(-1.20710678119))))
 
-    double R_p = (reachableEnergy - reach_min)/(reach_max- reach_min);
-    double R_c = (reach_max - reachableEnergy)/(reach_max- reach_min);
+    // double R_p = (reachableEnergy - reach_min)/(reach_max- reach_min);
+    // double R_c = (reach_max - reachableEnergy)/(reach_max- reach_min);
 
     #ifdef DEBUG
+        contactEnergyVal = contactEnergy();
         cout << "HybridReachableGraspEnergy::energy(): \t" << endl;
         cout << "========================================================================== \t" << endl;
         cout << "contactEnergyVal: \t" << contactEnergyVal << endl;
@@ -41,11 +42,32 @@ double HybridReachableGraspEnergy::energy() const
         cout << "reachableEnergy: \t" << reachableEnergy << endl;
     #endif
 
-    if (potentialEnergy > 0.0)
-        {
-            return contactEnergyVal * 10*R_c;
+    if ((potentialEnergy > 0.0) && (reachableEnergy > 0))
+        {   // bad grasp but reachable
+            contactEnergyVal = contactEnergy();
+            return contactEnergyVal * .1 * reachableEnergy;
         }
-        return potentialEnergy * 10*R_p;
+    if ((potentialEnergy > 0.0) && (reachableEnergy < 0))
+        {   // bad grasp not reachable
+            contactEnergyVal = contactEnergy();
+            return contactEnergyVal * 1 * (reach_max - reachableEnergy);
+        }
+    if ((potentialEnergy < 0.0) && (reachableEnergy > 0))
+        {   // good grasp and reachable
+            return potentialEnergy * 1000 * reachableEnergy;
+        }
+        if ((potentialEnergy < 0.0) && (reachableEnergy < 0))
+        {   // good grasp not reachable
+            return potentialEnergy * 1 * (reachableEnergy - reach_min);
+        }
+
+// if (potentialEnergy > 0.0)
+//         {
+//             // return contactEnergyVal * 1*R_c;
+//             return R_c;
+//         }
+//         // return potentialEnergy * 1*R_p;
+//         return R_p;
 
 
     // double energyCombined = contact_coeff*contactEnergyVal + potential_coeff*potentialEnergy + reachability_coeff*reachableEnergy;
