@@ -27,9 +27,9 @@
 #include <iostream>
 #include <string>
 #include "graspit/EGPlanner/energy/searchEnergyFactory.h"
-// #include "contactEnergy.h"
 #include "reachabilityEnergy.h"
 #include "hybridReachableGraspEnergy.h"
+#include "reachableFirstHybridGraspEnergy.h"
 
 
 namespace customEnergy {
@@ -48,6 +48,7 @@ int customEnergyPlugin::init(int argc, char** argv)
 {
     REGISTER_SEARCH_ENERGY_CREATOR("REACHABILITY_ENERGY", ReachabilityEnergy);
     REGISTER_SEARCH_ENERGY_CREATOR("HYBRID_REACHABLE_GRASP_ENERGY", HybridReachableGraspEnergy);
+    REGISTER_SEARCH_ENERGY_CREATOR("REACHABLE_FIRST_HYBRID_GRASP_ENERGY", ReachableFirstHybridGraspEnergy);
   std::cerr << "Custom energy plugin initialized with args:\n";
   for(int i=0; i < argc; i++)
     {

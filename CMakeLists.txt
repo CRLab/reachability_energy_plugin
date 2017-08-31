@@ -131,6 +131,7 @@ add_library(reachability_energy_plugin
 	src/customEnergyPlugin.cpp
 	src/reachabilityEnergy.cpp
 	src/hybridReachableGraspEnergy.cpp
+	src/reachableFirstHybridGraspEnergy.cpp
 	src/reachableEnergyUtils.cpp
 )
 
