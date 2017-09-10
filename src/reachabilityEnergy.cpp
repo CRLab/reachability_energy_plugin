@@ -11,35 +11,48 @@
 // #define DEBUG
 
 #include <QSettings>
+#include <QFileInfo>
 
+bool fileExists(QString path){
+    QFileInfo check_file(path);
+    return check_file.exists() && check_file.isFile();
+}
 
 ReachabilityEnergy::ReachabilityEnergy()
 {
 //    export REACHABILITY_CONFIG_FILE=/home/ireti/ros/reachability_paper_experiments/src/graspit-ros/graspit/graspit_source/reachability.conf
     QString configDir = getenv("REACHABILITY_CONFIG_DIR");
-    QString configFile = configDir + QString("/reachability.conf");
 #ifdef DEBUG
     std::cout << "configDir: \t" << configDir.toStdString() << std::endl;
-    std::cout << "configFile: \t" << configFile.toStdString() << std::endl;
 #endif
 
-    QSettings settings(configFile,  QSettings::NativeFormat);
-    string filename = configDir.toStdString() + "/processed/reach_data";
-    string filename_objBaseTrans = configDir.toStdString() + "/object_pose_in_reference_frame.csv";
+    string filename = configDir.toStdString() + "/reach_data";
 
-    contact_coeff = settings.value("reachability_config/contact_energy_coeff").toDouble();
-    potential_coeff = settings.value("reachability_config/potential_energy_coeff").toDouble();
-    reachability_coeff = settings.value("reachability_config/reachability_energy_coeff").toDouble();
-    
+    if (!fileExists((filename+".dims").c_str())) {
+        std::cerr << filename+".dims does not exist" << std::endl;
+        exit(EXIT_FAILURE);
+    }
+    if (!fileExists((filename+".mins").c_str())) {
+        std::cerr << filename+".mins does not exist" << std::endl;
+        exit(EXIT_FAILURE);
+    }
+    if (!fileExists((filename+".step").c_str())) {
+        std::cerr << filename+".step does not exist" << std::endl;
+        exit(EXIT_FAILURE);
+    }
+    if (!fileExists((filename+".full").c_str())) {
+        std::cerr << filename+".full does not exist" << std::endl;
+        exit(EXIT_FAILURE);
+    }
+    if (!fileExists((filename+".sdf").c_str())) {
+        std::cerr << filename+".sdf does not exist" << std::endl;
+        exit(EXIT_FAILURE);
+    }
+
 
 #ifdef DEBUG
     std::cout << "reachability data filename: " << filename << std::endl;
-    std::cout << "filename_objBaseTrans: " << filename_objBaseTrans << std::endl;
-    std::cout << "contact_coeff: " << contact_coeff << std::endl;
-    std::cout << "potential_coeff: " << potential_coeff << std::endl;
-    std::cout << "reachability_coeff: " << reachability_coeff << std::endl;
 #endif
-
 
     // load reachability data
     load_file_templated (filename+".dims", dims);
@@ -83,11 +96,6 @@ ReachabilityEnergy::ReachabilityEnergy()
       #endif
     }
 
-    // load object-base transform
-    load_file_as_eigen_matrix (filename_objBaseTrans, objectBaseTrans);
-#ifdef DEBUG
-    std::cout << "object-base transform: \t "<< std::endl << objectBaseTrans << std::endl;
-#endif
 }
 
 
@@ -102,27 +110,16 @@ double ReachabilityEnergy::energy() const
 
 double ReachabilityEnergy::reachableQualityEnergy() const
 {
-    // get hand transform in object frame
-    transf transHO = mObject->getTran().inverse() % mHand->getTran();
-    Eigen::MatrixXd queryPoseInObjectFrame(4,4);
-    queryPoseInObjectFrame.block(0, 0, 3, 3) = transHO.affine();
-    queryPoseInObjectFrame.block(0, 3, 3, 1) = transHO.translation();
-    queryPoseInObjectFrame(3, 0) = 0;
-    queryPoseInObjectFrame(3, 1) = 0;
-    queryPoseInObjectFrame(3, 2) = 0;
-    queryPoseInObjectFrame(3, 3) = 1;
 
-
-    queryPoseInObjectFrame(0, 3) /= 1000;
-    queryPoseInObjectFrame(1, 3) /= 1000;
-    queryPoseInObjectFrame(2, 3) /= 1000;
-    Eigen::MatrixXd queryPoseInBaseLinkFrame = objectBaseTrans * queryPoseInObjectFrame;
+    // get hand transform in graspit world frame which should coincide with the reachability space frame
+    transf transHandPose = mHand->getTran();
+    Eigen::MatrixXd queryPoseInBaseLinkFrame = Eigen::MatrixXd::Identity(4,4);
+    queryPoseInBaseLinkFrame.block(0, 0, 3, 3) = transHandPose.affine();
+    queryPoseInBaseLinkFrame.block(0, 3, 3, 1) = transHandPose.translation()/1000;
 
 
     // get xyzRPY as eigen vector
     Eigen::VectorXd queryVecInBaseLinkFrame =  trans2xyzRPY (queryPoseInBaseLinkFrame);
-//    cout << "queryPoseInBaseLinkFrame : \t" << queryPoseInBaseLinkFrame << endl;
-//    cout << "queryVecInBaseLinkFrame : \t" << queryVecInBaseLinkFrame << endl;
     return interpolateReachability( queryVecInBaseLinkFrame);
 }
 

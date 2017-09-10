@@ -8,7 +8,7 @@
 
 
 #include <fstream>
-#define DEBUG
+//#define DEBUG
 
 
 //ReachableFirstHybridGraspEnergy::ReachableFirstHybridGraspEnergy()

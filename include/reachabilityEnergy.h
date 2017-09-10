@@ -24,7 +24,6 @@ class ReachabilityEnergy: public SearchEnergy
   private:
     Eigen::VectorXd isReachableFlagMatrix;
     Eigen::VectorXd stepSize;
-    Eigen::MatrixXd objectBaseTrans;
     double alpha;
     double contact_coeff;
     double potential_coeff;
