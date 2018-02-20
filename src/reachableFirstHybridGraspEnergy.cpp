@@ -62,7 +62,7 @@ double ReachableFirstHybridGraspEnergy::energy() const
             // reachable energy range [0:3]
             // result range [20:350]
             contactEnergyVal = contactEnergy();
-            return contactEnergyVal + 1 * (reach_max - reachableEnergy);
+            return contactEnergyVal - 10 * reachableEnergy;
         }
     }
     else {
