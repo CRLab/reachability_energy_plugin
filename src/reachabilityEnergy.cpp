@@ -249,7 +249,8 @@ double ReachabilityEnergy::interpolateReachability(
            weights[pos] = ((1.0 - after) * (1.0 - alpha) + (after) * (alpha));
 
            weight *= weights[pos];
-           index[pos] = int(ndivs[pos]) + after;
+           // index[pos] = int(ndivs[pos]) + after;
+           index[pos] = std::min( int(ndivs[pos]) + after,  dims[pos]-1);
        }
 
       // collate index and weight
